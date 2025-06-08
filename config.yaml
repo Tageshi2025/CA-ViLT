@@ -1,0 +1,30 @@
+# config.yaml (模板)
+data:
+  dataset: "coco"
+  image_path: "./data/coco/images"
+  annotation_path: "./data/coco/annotations.json"
+  ac_matrix_path: "./data/ac_matrix_cache/"
+
+train:
+  batch_size: 32
+  lr: 1e-4
+  epochs: 20
+  save_interval: 5
+  save_path: "./checkpoints"
+
+model:
+  hidden_dim: 768
+  num_heads: 12
+  num_layers: 12
+  dropout: 0.1
+  gamma_init: 0.0
+
+causal:
+  use_gnn: true
+  gnn_type: "GAT"
+  gate_type: "mlp"
+  causal_bias_mode: "score_bias"  # or "weight_scaling"
+  lambda_gate: 1.0
+  lambda_inv_loss: 0.1
+
+device: "cuda"

@@ -1,8 +1,8 @@
-# config.yaml (模板)
+# config.yaml
 data:
   dataset: "coco"
-  image_path: "./data/coco/images"
-  annotation_path: "./data/coco/annotations.json"
+  image_dir: "./data/coco/images"
+  annotation_file: "./data/coco/annotations/instances_train2017.json"  # COCO 训练集注释文件
   ac_matrix_path: "./data/ac_matrix_cache/"
 
 train:
@@ -23,7 +23,7 @@ causal:
   use_gnn: true
   gnn_type: "GAT"
   gate_type: "mlp"
-  causal_bias_mode: "score_bias"  # or "weight_scaling"
+  causal_bias_mode: "score_bias"  # 或 "weight_scaling"
   lambda_gate: 1.0
   lambda_inv_loss: 0.1
 

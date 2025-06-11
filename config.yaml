@@ -1,30 +1,8 @@
-# config.yaml
 data:
-  dataset: "coco"
-  image_dir: "./data/coco/images"
-  annotation_file: "./data/coco/annotations/instances_train2017.json"  # COCO 训练集注释文件
-  ac_matrix_path: "./data/ac_matrix_cache/"
+  image_dir: "./data/coco/train2017"
+  caption_json: "./data/coco/coco_train_captions.json"
 
 train:
-  batch_size: 32
+  batch_size: 1024
   lr: 1e-4
-  epochs: 20
-  save_interval: 5
-  save_path: "./checkpoints"
-
-model:
-  hidden_dim: 768
-  num_heads: 12
-  num_layers: 12
-  dropout: 0.1
-  gamma_init: 0.0
-
-causal:
-  use_gnn: true
-  gnn_type: "GAT"
-  gate_type: "mlp"
-  causal_bias_mode: "score_bias"  # 或 "weight_scaling"
-  lambda_gate: 1.0
-  lambda_inv_loss: 0.1
-
-device: "cuda"
+  epochs: 5

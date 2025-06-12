@@ -1,8 +1,11 @@
+# config.yaml
 data:
   image_dir: "./data/coco/train2017"
   caption_json: "./data/coco/coco_train_captions.json"
 
 train:
   batch_size: 1024
-  lr: 1e-4
-  epochs: 5
+  lr: 5e-5
+  epochs: 10
+  neg_strategy: light_semantic
+  max_samples: 100000   # 注释掉以启用全数据训练

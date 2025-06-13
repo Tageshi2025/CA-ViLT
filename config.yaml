@@ -7,5 +7,5 @@ train:
   batch_size: 1024
   lr: 5e-5
   epochs: 10
-  neg_strategy: light_semantic
+  neg_strategy: hard # light_semantic, hard
   max_samples: 100000   # 注释掉以启用全数据训练

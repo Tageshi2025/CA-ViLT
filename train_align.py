@@ -34,8 +34,13 @@ def plot_training_curve(log_csv_path, save_path="plots/train_curve.png"):
     print(f"✅ 已保存训练曲线图至: {save_path}")
 
 def main(config):
-    device = torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
-    torch.cuda.set_device(device)
+    # 稳定的 GPU 初始化方式
+    gpu_index = config["train"].get("gpu", 0)
+    if torch.cuda.is_available():
+        device = torch.device(f"cuda:{gpu_index}")
+        torch.cuda.set_device(device)
+    else:
+        device = torch.device("cpu")
 
     model = AlignViltModel().to(device)
     dataset = ImageTextPairDataset(
@@ -57,7 +62,6 @@ def main(config):
     optimizer = optim.Adam(model.parameters(), lr=float(config["train"]["lr"]))
     scaler = GradScaler()
 
-    # 日志准备
     log_dir = "./logs"
     ckpt_dir = "./checkpoints"
     os.makedirs(log_dir, exist_ok=True)
@@ -91,21 +95,31 @@ def main(config):
             with autocast(device_type="cuda"):
                 outputs = model(image, input_ids, attn_mask)
                 losses = compute_loss(outputs, labels)
+
+                # Optional clamp to avoid overly large contrastive loss
+                # losses["contrastive_loss"] = torch.clamp(losses["contrastive_loss"], max=10.0)
+
                 loss = losses["total_loss"]
+
+            # ❗ 防止非法loss传播
+            if not torch.isfinite(loss):
+                print(f"⚠️ 非法 loss 出现, 跳过 batch: {losses}")
+                continue
 
             optimizer.zero_grad()
             scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # ✅ 梯度裁剪
             scaler.step(optimizer)
             scaler.update()
 
-            total_loss += losses["total_loss"].item()
+            total_loss += loss.item()
             match_loss += losses["match_loss"].item()
             contrastive_loss += losses["contrastive_loss"].item()
 
             all_logits.extend(outputs["match_logits"].detach().cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
-        # 评估指标
         avg_total_loss = total_loss / len(dataloader)
         avg_match_loss = match_loss / len(dataloader)
         avg_contrastive_loss = contrastive_loss / len(dataloader)
